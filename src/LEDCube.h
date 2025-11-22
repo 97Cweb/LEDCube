@@ -3,20 +3,6 @@
 #include <Arduino.h>
 #include "Tlc5948.h"
 
-#undef  TLC5948_LAT_PIN
-#undef  TLC5948_GSCLK_PIN
-#undef  TLC5948_SCLK_PIN
-#undef  TLC5948_MOSI_PIN
-#define TLC5948_LAT_PIN   5
-#define TLC5948_GSCLK_PIN 22
-#define TLC5948_SCLK_PIN  20
-#define TLC5948_MOSI_PIN  21
-
-#define LAYER_0 19
-#define LAYER_1 18
-#define LAYER_2 15
-#define LAYER_3 14
-
 constexpr int NUM_TLCS      = 3;
 constexpr int NUM_DRAINS  = 16 * NUM_TLCS; // GS channels per TLC5948
 constexpr int FRAMESIZE = 64;              // 4x4x4 cube = 64 voxels
@@ -45,19 +31,23 @@ struct Coord {
 
 class LEDCube{
   public:
-    LEDCube(); //init
+    LEDCube(uint8_t layer0Pin = 19,
+            uint8_t layer1Pin = 18,
+            uint8_t layer2Pin = 15,
+            uint8_t layer3Pin = 14);
     void setVoxel(int x, int y, int z, const Colour &rgb);
     void setVoxel(int index, const Colour &rgb); // 0..63
-    void setVoxel(Coord xyz, const Colour &rgb);
-    void setFrame(Colour* frameData, size_t count = FRAMESIZE);
+    void setVoxel(const Coord &xyz, const Colour &rgb);
+    void setFrame(const Colour* frameData, size_t count = FRAMESIZE);
     void clear();
     
     void draw();
     
   private:
+  uint8_t _layerPins[4];
     Tlc5948 tlc;
     uint16_t gs[NUM_DRAINS];
-    uint16_t frame[FRAMESIZE];
+    Colour frame[FRAMESIZE];
     uint8_t currentLayer = 0; 
     
 };
